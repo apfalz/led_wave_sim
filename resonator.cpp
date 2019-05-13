@@ -99,10 +99,11 @@ public:
     }
 
     void excite(float tgt) {
+        amplitude = 1.0;
         if (target > amplitude) {
             counter  = 20;
             target   = tgt;
-            amp_step = target - amplitude / counter;
+            amp_step = target - amplitude / (float) counter;
         }
     }
 
@@ -136,10 +137,13 @@ void setup() {
 
     for (int l = 0; l < num_res; l++) {
         float frequ = (float) l + 20.0;
-        resonators[l] = new Resonator(l, frequ, 0.99, 1.0);
+        resonators[l] = new Resonator(l, frequ, 0.99, 0.0);
     }
 
+    resonators[5]->excite(1.0);
     strip.begin();
+//    Serial.begin(9600);
+//    Serial.println("setup");
 }
 
 
@@ -158,5 +162,5 @@ void loop(){
 
 
 
-    delay(1000);
+    delay(100);
 }
