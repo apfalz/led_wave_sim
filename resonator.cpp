@@ -72,8 +72,8 @@ public:
         }
 
         pos        = cos(freq*phase) * amplitude;
-        pos       += (l_neighb * influence);
-        pos       += (r_neighb * influence);
+        pos       += ((l_neighb - pos) * influence);
+        pos       += ((r_neighb - pos) * influence);
 
         pos        = max(-1.0, pos);
         pos        = min( 1.0, pos);
