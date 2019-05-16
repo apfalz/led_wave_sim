@@ -1,9 +1,13 @@
+//
+// Created by Pfalz, Andrew on 2019-05-15.
+//
+
 #include <Adafruit_NeoPixel.h>
 
 #define PIN 5
 #define NUM_LEDS 30
 
-        Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
 
 //this is where the colors are stored.
@@ -58,9 +62,9 @@ public:
             amplitude += amp_step;
             counter -= 1;
         } else {
-            int rand = random(1000);
+            int rand = random(500);
             if (rand == index) {
-                excite(1.0);
+                excite();
             }
         }
 
@@ -81,21 +85,30 @@ public:
 
     void scale_color() {
         if (pos > 0.0) {
-            strip.setPixelColor(index, 0, 0,  (int) (pos * 255.0));
+            /*if (pos > 0.5) {
+                strip.setPixelColor(index, 0, (int)(pos * 128.0), (int) (pos * 255.0));
+            } else {
+                strip.setPixelColor(index, 0, 0, (int) (pos * 255.0));
+            }*/
+            strip.setPixelColor(index, 0, (int)(pos * 192.0), (int) (pos * 255.0));
         }else{
-//            current_colors[2][index] = 0;
-//            current_colors[1][index] = (int) -1 * pos * 255;
-            strip.setPixelColor(index, 0,  (int) -1 * pos * 255, 0);
+            /*if (pos < -0.5) {
+                strip.setPixelColor(index, (int) (pos * -128.0),  (int)  pos * -255, 0);
+            } else {
+                strip.setPixelColor(index, 0,  (int) -1 * pos * 255, 0);
+            }*/
+            strip.setPixelColor(index, (int) (pos * -192.0),  (int)(pos * -255.0), 0);
         }
 
     }
 
-    void excite(float tgt) {
-        if (tgt > amplitude) {
-            counter  = 20;
-            target   = tgt;
-            amp_step = target - amplitude / (float) counter;
-        }
+    void excite() {
+//        if (tgt > amplitude) {
+        counter  = 20;
+        target   = ((float) random(200) / 100.0) - 1.0;;
+        amp_step = (target - amplitude) / (float) counter;
+        freq     = (float) random(10);
+//        }
     }
 
 
@@ -154,16 +167,29 @@ int num_res;
 
 
 void setup() {
+    Serial.begin(9600);
     num_res = 30;
 
 
-    freq      = 20.0;
-    damping   = 0.99;
-    increment = 0.001;
-    influence = 0.1;
+    freq      = 10.0;
+    damping   = 0.96;
+    increment = 0.00001;
+    influence = 0.5;
 
-    resonators[5].excite(1.0);
+
     strip.begin();
+
+
+
+    resonators[0].excite();
+
+
+
+
+    for (int j=0; j<num_res-1; j++) {
+        resonators[j].set_neighbor(  &resonators[j+1].pos, 1);//right
+        resonators[j+1].set_neighbor(&resonators[j  ].pos, 0);//left
+    }
 
 
 
@@ -174,15 +200,10 @@ void setup() {
 void loop(){
 
 
-    for (int j=0; j<num_res-1; j++) {
-        resonators[j].set_neighbor(  &resonators[j+1].pos, 1);//right
-        resonators[j+1].set_neighbor(&resonators[j  ].pos, 0);//left
-    }
     for (int k=0; k<num_res; k++) {
         resonators[k].take_step();
     }
     strip.show();
-//    update_strip();
 
 
 
